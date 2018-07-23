@@ -1,10 +1,11 @@
-// @flow
-import { dasherize } from 'inflection';
+/* @flow */
 
-import chain from '../../../utils/chain';
-import underscore from '../../../utils/underscore';
+import { dasherize } from 'inflection'
 
-const NAMESPACE_DELIMITER = /\$-/g;
+import chain from '../../../utils/chain'
+import underscore from '../../../utils/underscore'
+
+const NAMESPACE_DELIMITER = /\$-/g
 
 /**
  * @private
@@ -16,13 +17,13 @@ export default function formatKey(
   return chain(key)
     .pipe(str => {
       if (formatter) {
-        return formatter(str);
+        return formatter(str)
       }
 
-      return str;
+      return str
     })
     .pipe(underscore)
     .pipe(dasherize)
     .pipe(str => str.replace(NAMESPACE_DELIMITER, '/'))
-    .value();
+    .value()
 }

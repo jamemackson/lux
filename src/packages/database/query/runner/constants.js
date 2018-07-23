@@ -1,4 +1,5 @@
-// @flow
-import type Query from '../index';
+/* @flow */
 
-export const RUNNERS: WeakMap<Query<*>, () => Promise<void>> = new WeakMap();
+import type Query from '../index'
+
+export const RUNNERS: WeakMap<Query<*>, () => Promise<void>> = new WeakMap()

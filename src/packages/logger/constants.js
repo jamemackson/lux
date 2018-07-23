@@ -1,25 +1,27 @@
-// @flow
-import { FreezeableMap, FreezeableSet } from '../freezeable';
+/* @flow */
 
-import type { Logger$level, Logger$format } from './interfaces';
+import { FreezeableMap, FreezeableSet } from '../freezeable'
 
-export const DEBUG = 'DEBUG';
-export const INFO = 'INFO';
-export const WARN = 'WARN';
-export const ERROR = 'ERROR';
+import type { Level, Format } from './index'
 
-export const FORMATS: FreezeableSet<Logger$format> = new FreezeableSet([
-  'text',
-  'json'
-]);
+export const DEBUG = 'DEBUG'
+export const INFO = 'INFO'
+export const WARN = 'WARN'
+export const ERROR = 'ERROR'
 
-FORMATS.freeze();
+export const FORMATS: FreezeableSet<Format> = (
+  new FreezeableSet(['text', 'json'])
+)
 
-export const LEVELS: FreezeableMap<Logger$level, number> = new FreezeableMap([
-  [DEBUG, 0],
-  [INFO, 1],
-  [WARN, 2],
-  [ERROR, 3],
-]);
+FORMATS.freeze()
 
-LEVELS.freeze();
+export const LEVELS: FreezeableMap<Level, number> = (
+  new FreezeableMap([
+    [DEBUG, 0],
+    [INFO, 1],
+    [WARN, 2],
+    [ERROR, 3],
+  ])
+)
+
+LEVELS.freeze()

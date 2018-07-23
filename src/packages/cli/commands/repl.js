@@ -1,21 +1,22 @@
-// @flow
-import path from 'path';
-import { start as startRepl } from 'repl';
+/* @flow */
 
-import { CWD } from '../../../constants';
-import type Application from '../../application';
+import * as path from 'path'
+import { start as startRepl } from 'repl'
+
+import { CWD } from '../../../constants'
+import type Application from '../../application'
 
 export function repl(): Promise<void> {
   return new Promise(async (resolve) => {
     const app: Application = await Reflect.apply(require, null, [
       path.join(CWD, 'dist', 'boot')
-    ]);
+    ])
 
     const instance = startRepl({
       prompt: '> '
-    });
+    })
 
-    instance.once('exit', resolve);
+    instance.once('exit', resolve)
 
     Object.assign(instance.context, {
       app,
@@ -43,6 +44,6 @@ export function repl(): Promise<void> {
           ...context,
           [serializer.constructor.name]: serializer
         }), {})
-    });
-  });
+    })
+  })
 }

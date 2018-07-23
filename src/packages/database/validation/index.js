@@ -1,5 +1,6 @@
-// @flow
-import type { Validation$opts } from './interfaces';
+/* @flow */
+
+import type { Validation$opts } from './interfaces'
 
 /**
  * @private
@@ -33,13 +34,13 @@ class Validation<T> {
         enumerable: false,
         configurable: false
       }
-    });
+    })
   }
 
   isValid(): boolean {
-    return this.validator(this.value);
+    return this.validator(this.value)
   }
 }
 
-export default Validation;
-export { ValidationError } from './errors';
+export default Validation
+export { ValidationError } from './errors'

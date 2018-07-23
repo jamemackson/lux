@@ -1,16 +1,17 @@
-// @flow
-import { EOL } from 'os';
+/* @flow */
 
-import { classify, camelize } from 'inflection';
+import { EOL } from 'os'
 
-import template from '../../template';
-import indent from '../utils/indent';
-import chain from '../../../utils/chain';
-import entries from '../../../utils/entries';
-import underscore from '../../../utils/underscore';
+import { classify, camelize } from 'inflection'
 
-const VALID_ATTR = /^(\w|-)+:(\w|-)+$/;
-const RELATIONSHIP = /^belongs-to|has-(one|many)$/;
+import template from '../../template'
+import indent from '../utils/indent'
+import chain from '../../../utils/chain'
+import entries from '../../../utils/entries'
+import underscore from '../../../utils/underscore'
+
+const VALID_ATTR = /^(\w|-)+:(\w|-)+$/
+const RELATIONSHIP = /^belongs-to|has-(one|many)$/
 
 /**
  * @private
@@ -19,7 +20,7 @@ export default (name: string, attrs: Array<string>) => {
   const normalized = chain(name)
     .pipe(underscore)
     .pipe(classify)
-    .value();
+    .value()
 
   return template`
     import { Model } from 'lux-framework';
@@ -33,16 +34,16 @@ export default (name: string, attrs: Array<string>) => {
         const key = chain(type)
           .pipe(underscore)
           .pipe(str => camelize(str, true))
-          .value();
+          .value()
 
-        const value = Reflect.get(types, key);
+        const value = Reflect.get(types, key)
 
         if (value) {
-          const inverse = camelize(normalized, true);
+          const inverse = camelize(normalized, true)
           const relatedKey = chain(related)
             .pipe(underscore)
             .pipe(str => camelize(str, true))
-            .value();
+            .value()
 
           return {
             ...types,
@@ -52,10 +53,10 @@ export default (name: string, attrs: Array<string>) => {
               + `${indent(10)}inverse: '${inverse}'${EOL}`
               + `${indent(8)}}`
             ]
-          };
+          }
         }
 
-        return types;
+        return types
       }, {
         hasOne: [],
         hasMany: [],
@@ -66,10 +67,10 @@ export default (name: string, attrs: Array<string>) => {
         chain(result)
           .pipe(str => {
             if (index && str.length) {
-              return `${str}${EOL.repeat(2)}`;
+              return `${str}${EOL.repeat(2)}`
             }
 
-            return str;
+            return str
           })
           .pipe(str => (
             str // eslint-disable-line prefer-template
@@ -82,5 +83,5 @@ export default (name: string, attrs: Array<string>) => {
     }
 
     export default ${normalized};
-  `;
-};
+  `
+}

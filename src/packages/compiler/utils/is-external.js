@@ -1,5 +1,6 @@
-// @flow
-import path from 'path';
+/* @flow */
+
+import * as path from 'path'
 
 /**
  * @private
@@ -16,5 +17,5 @@ export default function isExternal(dir: string): (id: string) => boolean {
     || id === 'LUX_LOCAL'
     || id === 'babelHelpers'
     || id === '\u0000babelHelpers'
-  );
+  )
 }

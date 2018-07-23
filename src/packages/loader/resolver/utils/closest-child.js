@@ -1,7 +1,8 @@
-// @flow
-import { posix } from 'path';
+/* @flow */
 
-import type { Bundle$Namespace } from '../../index';
+import { posix } from 'path'
+
+import type { Bundle$Namespace } from '../../index'
 
 export default function closestChild<T>(
   source: Bundle$Namespace<T>,
@@ -10,7 +11,7 @@ export default function closestChild<T>(
   const [[, result] = []] = Array
     .from(source)
     .map(([path, value]) => [posix.basename(path), value])
-    .filter(([resource]) => key === resource);
+    .filter(([resource]) => key === resource)
 
-  return result;
+  return result
 }

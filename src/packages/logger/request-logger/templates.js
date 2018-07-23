@@ -1,26 +1,25 @@
-// @flow
-import { blue, cyan, magenta, yellow } from 'chalk';
+/* @flow */
 
-import line from '../utils/line';
+import { blue, cyan, magenta, yellow } from 'chalk'
 
-import type { RequestLogger$templateData } from './interfaces';
+import line from '../utils/line'
 
 /**
  * @private
  */
 function countDigits(num: number) {
-  const digits = Math.floor(Math.log10(num) + 1);
+  const digits = Math.floor(Math.log10(num) + 1)
 
-  return digits > 0 && Number.isFinite(digits) ? digits : 1;
+  return digits > 0 && Number.isFinite(digits) ? digits : 1
 }
 
 /**
  * @private
  */
 function pad(startTime: number, endTime: number, duration: number) {
-  const maxLength = countDigits(endTime - startTime);
+  const maxLength = countDigits(endTime - startTime)
 
-  return ' '.repeat(maxLength - countDigits(duration)) + duration;
+  return ' '.repeat(maxLength - countDigits(duration)) + duration
 }
 
 /**
@@ -38,7 +37,7 @@ export const debugTemplate = ({
   statusCode,
   statusMessage,
   remoteAddress
-}: RequestLogger$templateData) => `\
+}: any) => `\
 ${line`
   Processed ${cyan(`${method}`)} "${path}" from ${remoteAddress}
   with ${Reflect.apply(colorStr, null, [`${statusCode}`])}
@@ -56,29 +55,28 @@ ${JSON.stringify(params, null, 2)}
 ${magenta('Stats')}
 
 ${stats.map(stat => {
-  const { type, duration, controller } = stat;
-  let { name } = stat;
+  const { type, duration, controller } = stat
+  let { name } = stat
 
-  name = blue(name);
+  name = blue(name)
 
   if (type === 'action') {
-    name = `${yellow(controller)}#${name}`;
+    name = `${yellow(controller)}#${name}`
   }
 
-  return `${pad(startTime, endTime, duration)} ms ${name}`;
+  return `${pad(startTime, endTime, duration)} ms ${name}`
 }).join('\n')}
 ${pad(startTime,
       endTime,
       stats.reduce((total, { duration }) => total + duration, 0))} ms Total
 ${(endTime - startTime).toString()} ms Actual\
-`;
+`
 
 /**
  * @private
  */
 export const infoTemplate = ({
   path,
-  route,
   method,
   params,
   colorStr,
@@ -87,16 +85,12 @@ export const infoTemplate = ({
   statusCode,
   statusMessage,
   remoteAddress
-}: RequestLogger$templateData) => line`
+}: any) => line`
 Processed ${cyan(`${method}`)} "${path}" ${magenta('Params')} ${
   JSON.stringify(params)} from ${remoteAddress
 } in ${(endTime - startTime).toString()} ms with ${
   Reflect.apply(colorStr, null, [`${statusCode}`])
 } ${
   Reflect.apply(colorStr, null, [`${statusMessage}`])
-} by ${
-  route
-  ? `${yellow(route.controller.constructor.name)}#${blue(route.action)}`
-  : null
 }
-`;
+`

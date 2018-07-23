@@ -1,34 +1,31 @@
-// @flow
-import { LUX_CONSOLE } from '../../constants';
-import Database from '../database';
-import Logger from '../logger';
-import Router from '../router';
-import Server from '../server';
-import { build, createLoader, closestChild } from '../loader';
-import { freezeProps, deepFreezeProps } from '../freezeable';
-import ControllerMissingError from '../../errors/controller-missing-error';
+/* @flow */
 
-import normalizePort from './utils/normalize-port';
-import createController from './utils/create-controller';
-import createSerializer from './utils/create-serializer';
+import Database from '../database'
+import Logger from '../logger'
+import Router from '../router'
+import { build, createLoader, closestChild } from '../loader'
+import { freezeProps, deepFreezeProps } from '../freezeable'
+import ControllerMissingError from '../../errors/controller-missing-error'
 
-import type Application, { Application$opts } from './index'; // eslint-disable-line no-unused-vars, max-len
+import createController from './utils/create-controller'
+import createSerializer from './utils/create-serializer'
+
+ // eslint-disable-next-line no-unused-vars
+import type Application, { Options } from './index'
 
 /**
  * @private
  */
 export default async function initialize<T: Application>(app: T, {
   path,
-  port,
+  adapter,
   logging,
   database,
-  server: serverConfig
-}: Application$opts): Promise<T> {
-  const load = createLoader(path);
-  const routes = load('routes');
-  const models = load('models');
-  const logger = new Logger(logging);
-  const normalizedPort = normalizePort(port);
+}: Options): Promise<T> {
+  const load = createLoader(path)
+  const routes = load('routes')
+  const models = load('models')
+  const logger = new Logger(logging)
 
   const store = await new Database({
     path,
@@ -36,7 +33,7 @@ export default async function initialize<T: Application>(app: T, {
     logger,
     config: database,
     checkMigrations: true
-  });
+  })
 
   const serializers = build(
     load('serializers'),
@@ -45,7 +42,7 @@ export default async function initialize<T: Application>(app: T, {
       store,
       parent
     })
-  );
+  )
 
   models.forEach(model => {
     Reflect.defineProperty(model, 'serializer', {
@@ -53,8 +50,8 @@ export default async function initialize<T: Application>(app: T, {
       writable: false,
       enumerable: false,
       configurable: false
-    });
-  });
+    })
+  })
 
   const controllers = build(
     load('controllers'),
@@ -64,7 +61,7 @@ export default async function initialize<T: Application>(app: T, {
       parent,
       serializers
     })
-  );
+  )
 
   controllers.forEach(controller => {
     Reflect.defineProperty(controller, 'controllers', {
@@ -72,66 +69,49 @@ export default async function initialize<T: Application>(app: T, {
       writable: true,
       enumerable: false,
       configurable: false
-    });
-  });
+    })
+  })
 
-  const ApplicationController = controllers.get('application');
+  const ApplicationController = controllers.get('application')
 
   if (!ApplicationController) {
-    throw new ControllerMissingError('application');
+    throw new ControllerMissingError('application')
   }
 
   const router = new Router({
     routes,
     controllers,
     controller: ApplicationController
-  });
-
-  const server = new Server({
-    router,
-    logger,
-    ...serverConfig
-  });
-
-  if (!LUX_CONSOLE) {
-    server.instance.listen(normalizedPort).once('listening', () => {
-      if (typeof process.send === 'function') {
-        process.send('ready');
-      } else {
-        process.emit('ready');
-      }
-    });
-  }
+  })
 
   Object.assign(app, {
     logger,
     models,
     controllers,
-    serializers
-  });
+    serializers,
+  })
 
   deepFreezeProps(app, true,
     'logger',
     'models',
     'controllers',
     'serializers'
-  );
+  )
 
   Object.assign(app, {
     path,
     store,
     router,
-    server,
-    port: normalizedPort
-  });
+  })
 
   freezeProps(app, false,
     'path',
-    'port',
     'store',
-    'router',
-    'server'
-  );
+    'router'
+  )
 
-  return Object.freeze(app);
+  Object.assign(app, { adapter: adapter(app) })
+  freezeProps(app, false, 'adapter')
+
+  return app
 }

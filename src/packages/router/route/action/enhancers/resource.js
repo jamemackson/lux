@@ -1,49 +1,41 @@
-// @flow
-import { Query } from '../../../../database';
-import { getDomain } from '../../../../server';
-import createPageLinks from '../utils/create-page-links';
-import type { Action } from '../interfaces';
+/* @flow */
+
+import { Query } from '../../../../database'
+import getDomain from '../../../../../utils/get-domain'
+import createPageLinks from '../utils/create-page-links'
+import type Controller from '../../../../controller'
+import type { Document } from '../../../../jsonapi'
+import type { Action } from '../interfaces'
 
 /**
 * @private
 */
-export default function resource(action: Action<any>): Action<any> {
+export default function resource(
+  action: Action<any>,
+  controller: Controller
+): Action<any> {
   // eslint-disable-next-line func-names
   const resourceAction = async function (req, res) {
-    const { route: { action: actionName } } = req;
-    const result = action(req, res);
-    let links = {};
-    let data;
-    let total;
+    const { name: actionName } = action
+    const result = action(req, res)
+    let links: $PropertyType<Document, 'links'> = {}
+    let data
+    let total
 
     if (actionName === 'index' && result instanceof Query) {
       [data, total] = await Promise.all([
         result,
         Query.from(result).count()
-      ]);
+      ])
     } else {
-      data = await result;
+      data = await result
     }
 
     if (Array.isArray(data) || (data && data.isModelInstance)) {
-      const domain = getDomain(req);
-
-      const {
-        params,
-        url: {
-          path,
-          pathname
-        },
-        route: {
-          controller: {
-            namespace,
-            serializer,
-            defaultPerPage
-          }
-        }
-      } = req;
-
-      const include = params.include || [];
+      const { namespace, serializer, defaultPerPage } = controller
+      const { params, url: { path, pathname } } = req
+      const include = params.include || []
+      const domain = getDomain(req)
 
       if (actionName === 'index') {
         links = createPageLinks({
@@ -51,16 +43,20 @@ export default function resource(action: Action<any>): Action<any> {
           domain,
           pathname,
           defaultPerPage,
-          total: total || 0
-        });
+          total: total || 0,
+        })
       } else if (actionName !== 'index' && namespace) {
-        links = {
-          self: domain.replace(`/${namespace}`, '') + path
-        };
+        let self = domain.replace(`/${namespace}`, '')
+
+        if (path) {
+          self += path
+        }
+
+        links = { self }
       } else if (actionName !== 'index' && !namespace) {
         links = {
-          self: domain + path
-        };
+          self: domain + (path || '')
+        }
       }
 
       return serializer.format({
@@ -68,15 +64,23 @@ export default function resource(action: Action<any>): Action<any> {
         links,
         domain,
         include
-      });
+      })
     }
 
-    return data;
-  };
+    return data
+  }
 
-  Reflect.defineProperty(resourceAction, 'name', {
-    value: action.name
-  });
+  Object.defineProperties(resourceAction, {
+    name: {
+      value: action.name,
+    },
+    isFinal: {
+      value: action.isFinal,
+      writable: false,
+      enumerable: false,
+      configurable: false,
+    },
+  })
 
-  return resourceAction;
+  return resourceAction
 }

@@ -1,7 +1,8 @@
-// @flow
-import { CWD } from '../../../constants';
-import { runGenerator } from '../generator';
-import type { Generator$opts } from '../generator'; // eslint-disable-line max-len, no-duplicate-imports
+/* @flow */
+
+import { CWD } from '../../../constants'
+import { runGenerator } from '../generator'
+import type { Generator$opts } from '../generator' // eslint-disable-line max-len, no-duplicate-imports
 
 /**
  * @private
@@ -17,5 +18,5 @@ export function generate({
     name,
     type,
     attrs
-  });
+  })
 }
